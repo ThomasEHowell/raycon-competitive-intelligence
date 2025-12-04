@@ -17,11 +17,11 @@ However, Raycon lacks clear visibility into:
 
 **Objectives:**
 This project aims to build a data pipeline and competitive-intelligence analytics system that will:
-- Track Raycon’s daily visibility across a set of relevant Google Shopping keywords
-- Measure Raycon’s placement (top-5, top-10, average rank) relative to competing brands such as Sony, Bose, JBL, Soundcore, and Skullcandy
-- Analyze pricing positions across sellers to understand how Raycon’s price competitiveness influences visibility
-- Identify seller dynamics, including how many retailers list Raycon products and how this compares to competitors
-- Produce insights and recommendations based on visibility and pricing patterns
+- Pull daily Google Shopping results for 7 high importance keywords
+- Store the raw API payloads in a PostgreSQL raw table
+- Transform and normalize the data into staging tables
+- Generate visibility and pricing metrics in analytic mart tables
+- Produce insights and recommendations based on trends
 
 **Business Value:**
 By understanding visibility patterns, pricing pressures, and competitor dominance, Raycon can:
@@ -40,7 +40,15 @@ By understanding visibility patterns, pricing pressures, and competitor dominanc
 - Clear insights and potential recommendations based on observed patterns
 
 ## 2. Results Overview
+**Source:**
+SerpAPI → Google Shopping engine
 
+**Frequency:**
+Daily pulls (~7 keywords per day)
+
+**Raw Data:**
+Each API response includes:
+**To be explored in the staging process**
 
 ## 3. Dataset Overview
 
@@ -49,14 +57,39 @@ By understanding visibility patterns, pricing pressures, and competitor dominanc
 
 
 ## 5. Project Structure
-
+raycon-competitive-intel/
+│
+├── data/
+│   └── samples/
+│       └── google_shopping_example.json      # Sample raw API payload
+│
+├── notebooks/
+│   └── 01_explore_ingest_raw.ipynb           # API pull + raw ingestion
+│
+├── src/
+│   ├── db/
+│   │   └── schema_raw.sql                    # Raw table DDL
+│
+├── README.md
+├── .env (not committed)
+└── requirements.txt
 
 ## 6. How to Recreate This Project
 
 ### Prerequisites
-
+- Python 3.9+
+- PostgreSQL
+- SerpAPI key
+- Libraries installation:
+`pip install -r requirements.txt`
 
 ### Steps
-
+1. Create the raw schema via `src/db/schema_raw.sql`
+2. Add your database credentials and your SerpAPI key to your .env file
+3. Run the ingestion notebook:
+- Loads config
+- Pulls Google Shopping results
+- Inserts raw JSON into Postgres
+- Saves/updates the reference sample JSON
 
 ## 7. Conclusion
