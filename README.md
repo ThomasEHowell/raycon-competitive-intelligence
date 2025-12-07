@@ -72,8 +72,9 @@ raycon-competitive-intel/
 │   └── 02_parse_raw.ipynb            # JSON exploration + staging design + prototype transforms
 │
 ├── src/
-│   ├── db/
-│   │   └── schema_raw.sql                    # Raw table DDL
+│   └── db/
+│       ├── schema_raw.sql                    # Raw table DDL
+│       └── create_staging_tables.sql         # Staging tables DDL
 │
 ├── README.md
 ├── .env (not committed)
