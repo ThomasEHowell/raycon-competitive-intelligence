@@ -51,12 +51,16 @@ Each API response includes:
 **To be explored in the staging process**
 
 ## 3. Dataset Overview
-
+Raw JSON structure explored and documented in `02_parse_raw.ipynb`.```
 
 ## 4. Major Project Steps
+1. Ingest raw Google Shopping API payloads (`01_ingest_raw.ipynb`)
+2. Explore & parse raw JSON; design and prototype staging transformations (`02_parse_raw.ipynb`)
+3. Create staging tables (SQL DDL)
 
 
 ## 5. Project Structure
+```
 raycon-competitive-intel/
 │
 ├── data/
@@ -64,7 +68,8 @@ raycon-competitive-intel/
 │       └── google_shopping_example.json      # Sample raw API payload
 │
 ├── notebooks/
-│   └── 01_explore_ingest_raw.ipynb           # API pull + raw ingestion
+│   ├── 01_ingest_raw.ipynb           # API pull + raw ingestion
+│   └── 02_parse_raw.ipynb            # JSON exploration + staging design + prototype transforms
 │
 ├── src/
 │   ├── db/
@@ -73,7 +78,7 @@ raycon-competitive-intel/
 ├── README.md
 ├── .env (not committed)
 └── requirements.txt
-
+```
 ## 6. How to Recreate This Project
 
 ### Prerequisites
