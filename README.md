@@ -19,7 +19,7 @@ However, Raycon lacks clear visibility into:
 This project aims to build a data pipeline and competitive-intelligence analytics system that will:
 - Pull daily Google Shopping results for 7 high importance keywords
 - Store the raw API payloads in a PostgreSQL raw table
-- Transform and normalize the data into staging tables
+- Transform and flatten the data into staging tables
 - Generate visibility and pricing metrics in analytic mart tables
 - Produce insights and recommendations based on trends
 
@@ -40,23 +40,24 @@ By understanding visibility patterns, pricing pressures, and competitor dominanc
 - Clear insights and potential recommendations based on observed patterns
 
 ## 2. Results Overview
-**Source:**
-SerpAPI → Google Shopping engine
+**Source:** SerpAPI (Google Shopping engine)  
+**Cadence:** Daily (7 keywords/day)  
+**Storage layers:**
+- Raw: full JSON payload per keyword search
+- Staging: relational tables at search-level and product-level grain
 
-**Frequency:**
-Daily pulls (~7 keywords per day)
-
-**Raw Data:**
-Each API response includes:
-**To be explored in the staging process**
+**Key complexity handled in staging:**
+Google Shopping responses include variable result modules (e.g., standard results, categorized modules, and occasional inline/sponsored blocks). The staging logic safely handles missing/optional modules without breaking.
 
 ## 3. Dataset Overview
-Raw JSON structure explored and documented in `02_parse_raw.ipynb`.```
+Raw JSON structure explored and documented in `02_parse_raw.ipynb`.
 
 ## 4. Major Project Steps
+1. Create raw and staging tables via SQL DDL
 1. Ingest raw Google Shopping API payloads (`01_ingest_raw.ipynb`)
-2. Explore & parse raw JSON; design and prototype staging transformations (`02_parse_raw.ipynb`)
-3. Create staging tables (SQL DDL)
+3. Explore & parse raw JSON; design and prototype staging transformations (`02_parse_raw.ipynb`)
+4. Transform raw JSON into structured staging tables (`03_stage_unprocessed_raw.ipynb`)
+5. Future analytical and reporting layers
 
 
 ## 5. Project Structure
@@ -68,8 +69,9 @@ raycon-competitive-intel/
 │       └── google_shopping_example.json      # Sample raw API payload
 │
 ├── notebooks/
-│   ├── 01_ingest_raw.ipynb           # API pull + raw ingestion
-│   └── 02_parse_raw.ipynb            # JSON exploration + staging design + prototype transforms
+│   ├── 01_ingest_raw.ipynb               # API pull + raw ingestion
+│   ├── 02_parse_raw.ipynb                # JSON exploration + staging design + prototype transforms
+│   └── 03_stage_unprocessed_raw.ipynb    # Stage unprocessed raw searches into schema-aligned staging tables
 │
 ├── src/
 │   └── db/
@@ -89,13 +91,32 @@ raycon-competitive-intel/
 - Libraries installation:
 `pip install -r requirements.txt`
 
-### Steps
-1. Create the raw schema via `src/db/schema_raw.sql`
-2. Add your database credentials and your SerpAPI key to your .env file
-3. Run the ingestion notebook:
-- Loads config
-- Pulls Google Shopping results
-- Inserts raw JSON into Postgres
-- Saves/updates the reference sample JSON
+## Setup & Execution Steps
+
+1. Create database schemas and tables
+   - Run `src/db/schema_raw.sql` to create the raw schema
+   - Run `src/db/schema_staging.sql` to create staging tables
+
+2. Configure environment variables
+   - Add PostgreSQL credentials to `.env`
+   - Add your SerpAPI key (`SERPAPI_API_KEY`)
+
+3. Run raw data ingestion
+   - Execute `01_ingest_raw.ipynb`
+   - Pulls Google Shopping results via SerpAPI
+   - Inserts full JSON responses into the raw PostgreSQL table
+   - Updates the reference sample JSON used for development
+
+4. Parse and inspect raw JSON structure
+   - Execute `02_parse_raw.ipynb`
+   - Explore result modules and validate parsing logic
+
+5. Stage unprocessed raw searches
+   - Execute `03_stage_unprocessed_raw.ipynb`
+   - Identifies raw searches not yet staged
+   - Transforms JSON into structured staging tables
+   - Appends results within a single database transaction
 
 ## 7. Conclusion
+
+This project demonstrates an end-to-end data pipeline for competitive intelligence using real Google Shopping data, with a focus on robust ingestion, raw data preservation, and repeatable staging transformations. The resulting dataset provides a foundation for downstream visibility, pricing, and trend analysis.

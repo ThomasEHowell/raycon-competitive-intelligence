@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS raycon.stg_searches (
     page                   INTEGER     NOT NULL,
 
     -- Parameters extracted from search_parameters (one of the JSON dictionaries)
+    location_used 		   TEXT,
+    location_requested 	   TEXT,
     gl                     TEXT,
     hl                     TEXT,
     device                 TEXT,
@@ -58,6 +60,7 @@ CREATE TABLE IF NOT EXISTS raycon.stg_results (
     module_type        TEXT,                -- Either "all_products" or "categorized"
     module_label       TEXT,                -- e.g. "Waterproof fitness earbuds"
     module_index       INTEGER     NOT NULL,
+	block_position     TEXT,       
 
     -- Position within each module
     position_in_module INTEGER     NOT NULL,
