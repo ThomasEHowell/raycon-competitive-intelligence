@@ -20,8 +20,8 @@ This project aims to build a data pipeline and competitive-intelligence analytic
 - Pull daily Google Shopping results for 7 high importance keywords
 - Store the raw API payloads in a PostgreSQL raw table
 - Transform and flatten the data into staging tables
-- Generate visibility and pricing metrics in analytic mart tables
-- Produce insights and recommendations based on trends
+- Generate visibility and pricing metrics in an analytic mart
+- Produce a dashboard suite communicating insights and recommendations based on present trends
 
 **Business Value:**
 By understanding visibility patterns, pricing pressures, and competitor dominance, Raycon can:
@@ -37,7 +37,7 @@ By understanding visibility patterns, pricing pressures, and competitor dominanc
 - Daily visibility and pricing metrics
 - Competitor visibility share
 - Trend analysis over time
-- Clear insights and potential recommendations based on observed patterns
+- Clear dashboard insights and potential recommendations based on observed patterns
 
 ## 2. Results Overview
 **Source:** SerpAPI (Google Shopping engine)  
@@ -57,8 +57,8 @@ Raw JSON structure explored and documented in `02_parse_raw.ipynb`.
 1. Ingest raw Google Shopping API payloads (`01_ingest_raw.ipynb`)
 3. Explore & parse raw JSON; design and prototype staging transformations (`02_parse_raw.ipynb`)
 4. Transform raw JSON into structured staging tables (`03_stage_unprocessed_raw.ipynb`)
-5. Future analytical and reporting layers
-
+5. Create mart views via SQL DDL
+6. (Next) Create Tableau dashboard suite
 
 ## 5. Project Structure
 ```
@@ -75,14 +75,15 @@ raycon-competitive-intel/
 │
 ├── src/
 │   └── db/
-│       ├── schema_raw.sql                    # Raw table DDL
-│       └── create_staging_tables.sql         # Staging tables DDL
+│       ├── schema_raw.sql                        # Raw table DDL
+│       ├── create_staging_tables.sql             # Staging tables DDL
+│       └── create_mart_brand_day_visibility.sql  # Brand day visibility mart DDL
 │
 ├── README.md
 ├── .env (not committed)
 └── requirements.txt
 ```
-## 6. How to Recreate This Project
+## 6. Reproducibility
 
 ### Prerequisites
 - Python 3.9+
@@ -117,6 +118,11 @@ raycon-competitive-intel/
    - Transforms JSON into structured staging tables
    - Appends results within a single database transaction
 
+6. Create mart view (currently only one)
+   - Execute `src/db/create_mart_brand_day_visibility.sql`
+   - Brand x Day visibility mart
+   - Export to `data/processed/mart_brand_day_visibility.csv` for Tableau
+
 ## 7. Conclusion
 
-This project demonstrates an end-to-end data pipeline for competitive intelligence using real Google Shopping data, with a focus on robust ingestion, raw data preservation, and repeatable staging transformations. The resulting dataset provides a foundation for downstream visibility, pricing, and trend analysis.
+This project demonstrates an end-to-end data pipeline for competitive intelligence using real Google Shopping data, with a focus on robust ingestion, raw data preservation, and repeatable staging transformations. The resulting dataset and derived mart provide a foundation for downstream visibility, pricing, and trend analysis.
