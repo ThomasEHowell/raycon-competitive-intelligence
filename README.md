@@ -46,6 +46,11 @@ By understanding visibility patterns, pricing pressures, and competitor dominanc
 - Raw: full JSON payload per keyword search
 - Staging: relational tables at search-level and product-level grain
 
+**Semantic enrichment:**
+- Helper view (`vw_results_with_brand`) applies deterministic, rule-based brand classification
+  using prioritized substring matching on product titles.
+- This semantic layer is reused across marts and dimensions to avoid duplicated logic.
+
 **Key complexity handled in staging:**
 Google Shopping responses include variable result modules (e.g., standard results, categorized modules, and occasional inline/sponsored blocks). The staging logic safely handles missing/optional modules without breaking.
 
@@ -57,8 +62,9 @@ Raw JSON structure explored and documented in `02_parse_raw.ipynb`.
 1. Ingest raw Google Shopping API payloads (`01_ingest_raw.ipynb`)
 3. Explore & parse raw JSON; design and prototype staging transformations (`02_parse_raw.ipynb`)
 4. Transform raw JSON into structured staging tables (`03_stage_unprocessed_raw.ipynb`)
-5. Create mart views via SQL DDL
-6. (Next) Create Tableau dashboard suite
+5. Create semantic helper views and analytic marts via SQL
+6. Create derived brand-level dimension views for pricing context
+7. (Next) Create Tableau dashboard suite
 
 ## 5. Project Structure
 ```
@@ -75,9 +81,11 @@ raycon-competitive-intel/
 │
 ├── src/
 │   └── db/
-│       ├── schema_raw.sql                        # Raw table DDL
-│       ├── create_staging_tables.sql             # Staging tables DDL
-│       └── create_mart_brand_day_visibility.sql  # Brand day visibility mart DDL
+│       ├── schema_raw.sql
+│       ├── create_staging_tables.sql
+│       ├── vw_results_with_brand.sql              # Brand classification semantic layer
+│       ├── build_mart_brand_day_visibility.sql    # Brand × day visibility mart
+│       └── build_dim_brand_price_profile.sql      # Brand-level price profile dimension
 │
 ├── README.md
 ├── .env (not committed)
@@ -118,11 +126,13 @@ raycon-competitive-intel/
    - Transforms JSON into structured staging tables
    - Appends results within a single database transaction
 
-6. Create mart view (currently only one)
-   - Execute `src/db/create_mart_brand_day_visibility.sql`
-   - Brand x Day visibility mart
-   - Export to `data/processed/mart_brand_day_visibility.csv` for Tableau
+6. Create analytic views
+   - Execute mart and dimension SQL scripts in `src/db/`
+   - Export:
+     - `build_mart_brand_day_visibility` (time-series visibility metrics)
+     - `build_dim_brand_price_profile` (brand-level pricing context)
+   - Join on `brand` within Tableau Public
 
 ## 7. Conclusion
 
-This project demonstrates an end-to-end data pipeline for competitive intelligence using real Google Shopping data, with a focus on robust ingestion, raw data preservation, and repeatable staging transformations. The resulting dataset and derived mart provide a foundation for downstream visibility, pricing, and trend analysis.
+This project demonstrates an end-to-end data pipeline for competitive intelligence using real Google Shopping data, with a focus on robust ingestion, raw data preservation, and repeatable staging transformations. The resulting dataset and derived mart and dimension provide a foundation for downstream visibility, pricing, and trend analysis.

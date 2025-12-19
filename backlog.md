@@ -20,6 +20,7 @@
 - Staging notebook assumes shopping_results exists for all keyword searches
 
 ## Future Improvements
+- Add more complex pricing semantic logic to dim_brand_price_profile.sql (quantiles and derived logic)
 - Refactor ingestion into reusable .py modules
 - Add automated re-pull for failed keywords
 - Add data quality checks (row counts, null checks)
