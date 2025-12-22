@@ -49,7 +49,9 @@ brand_price_profile AS (
     MIN(pr.price) AS min_price_observed,
     MAX(pr.price) AS max_price_observed,
     AVG(pr.price) AS avg_price_observed,
-    PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY pr.price) AS median_price_observed
+    PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY pr.price) AS median_price_observed,
+	PERCENTILE_CONT(0.10) WITHIN GROUP (ORDER BY pr.price) AS price_percentile_10,
+	PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY pr.price) AS price_percentile_90
 
   FROM priced_results pr
   GROUP BY pr.brand
@@ -58,7 +60,9 @@ brand_price_profile AS (
 raycon_band AS (
   SELECT
     MIN(pr.price) AS raycon_min_price_observed,
-    MAX(pr.price) AS raycon_max_price_observed
+    MAX(pr.price) AS raycon_max_price_observed,
+	PERCENTILE_CONT(0.10) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_percentile_10,
+	PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_percentile_90
   FROM priced_results pr
   WHERE pr.brand = 'Raycon'
 )
@@ -75,10 +79,14 @@ SELECT
   bpp.max_price_observed,
   bpp.avg_price_observed,
   bpp.median_price_observed,
+  bpp.price_percentile_10,
+  bpp.price_percentile_90,
 
   -- Raycon observed band (constant across rows; useful for Tableau/debugging)
   rb.raycon_min_price_observed,
   rb.raycon_max_price_observed,
+  raycon_price_percentile_10,
+  raycon_price_percentile_90,
 
   /*
     Overlap definition:
@@ -90,26 +98,35 @@ SELECT
     WHEN rb.raycon_min_price_observed IS NULL
       OR rb.raycon_max_price_observed IS NULL
       THEN NULL
-    WHEN bpp.max_price_observed < rb.raycon_min_price_observed THEN 0
-    WHEN bpp.min_price_observed > rb.raycon_max_price_observed THEN 0
+    WHEN bpp.max_price_observed <= rb.raycon_min_price_observed THEN 0
+    WHEN bpp.min_price_observed >= rb.raycon_max_price_observed THEN 0
     ELSE 1
-  END AS overlaps_raycon_band,
+  END AS overlaps_absolute_raycon_band,
+
+  CASE
+    WHEN rb.raycon_price_percentile_10 IS NULL
+      OR rb.raycon_price_percentile_90 IS NULL
+      THEN NULL
+    WHEN bpp.price_percentile_90 <= rb.raycon_price_percentile_10 THEN 0
+    WHEN bpp.price_percentile_10 >= rb.raycon_price_percentile_90 THEN 0
+    ELSE 1
+  END AS overlaps_percentile_raycon_band,
 
   /*
     Coarse relationship label for filtering / storytelling in Tableau.
   */
   CASE
-    WHEN rb.raycon_min_price_observed IS NULL
-      OR rb.raycon_max_price_observed IS NULL
+    WHEN rb.raycon_price_percentile_10 IS NULL
+      OR rb.raycon_price_percentile_90 IS NULL
       THEN 'unknown'
-    WHEN bpp.max_price_observed < rb.raycon_min_price_observed THEN 'below_raycon_band'
-    WHEN bpp.min_price_observed > rb.raycon_max_price_observed THEN 'above_raycon_band'
-    ELSE 'overlaps_raycon_band'
-  END AS raycon_band_relationship
+    WHEN bpp.price_percentile_90 <= rb.raycon_price_percentile_10 THEN 'below_raycon_p10'
+    WHEN bpp.price_percentile_10 >= rb.raycon_price_percentile_90 THEN 'above_raycon_p90'
+    ELSE 'overlaps_raycon_p10_p90'
+  END AS raycon_percentile_band_relationship
 
 FROM brand_price_profile bpp
 CROSS JOIN raycon_band rb
 ORDER BY
-  overlaps_raycon_band DESC NULLS LAST,
+  overlaps_percentile_raycon_band DESC NULLS LAST,
   bpp.total_appearances DESC,
   bpp.brand;
