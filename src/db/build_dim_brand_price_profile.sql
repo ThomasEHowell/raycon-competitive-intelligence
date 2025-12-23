@@ -49,9 +49,11 @@ brand_price_profile AS (
     MIN(pr.price) AS min_price_observed,
     MAX(pr.price) AS max_price_observed,
     AVG(pr.price) AS avg_price_observed,
-    PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY pr.price) AS median_price_observed,
-	PERCENTILE_CONT(0.10) WITHIN GROUP (ORDER BY pr.price) AS price_percentile_10,
-	PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY pr.price) AS price_percentile_90
+	PERCENTILE_CONT(0.10) WITHIN GROUP (ORDER BY pr.price) AS price_p10,
+	PERCENTILE_CONT(0.2) WITHIN GROUP (ORDER BY pr.price) AS price_p20,
+	PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY pr.price) AS price_median,
+	PERCENTILE_CONT(0.8) WITHIN GROUP (ORDER BY pr.price) AS price_p80,
+	PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY pr.price) AS price_p90
 
   FROM priced_results pr
   GROUP BY pr.brand
@@ -61,8 +63,11 @@ raycon_band AS (
   SELECT
     MIN(pr.price) AS raycon_min_price_observed,
     MAX(pr.price) AS raycon_max_price_observed,
-	PERCENTILE_CONT(0.10) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_percentile_10,
-	PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_percentile_90
+	PERCENTILE_CONT(0.10) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_p10,
+	PERCENTILE_CONT(0.2) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_p20,
+	PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_median,
+	PERCENTILE_CONT(0.8) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_p80,
+	PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY pr.price) AS raycon_price_p90
   FROM priced_results pr
   WHERE pr.brand = 'Raycon'
 )
@@ -78,15 +83,20 @@ SELECT
   bpp.min_price_observed,
   bpp.max_price_observed,
   bpp.avg_price_observed,
-  bpp.median_price_observed,
-  bpp.price_percentile_10,
-  bpp.price_percentile_90,
+  bpp.price_p10,
+  bpp.price_p20,
+  bpp.price_median,
+  bpp.price_p80,
+  bpp.price_p90,
 
   -- Raycon observed band (constant across rows; useful for Tableau/debugging)
   rb.raycon_min_price_observed,
   rb.raycon_max_price_observed,
-  raycon_price_percentile_10,
-  raycon_price_percentile_90,
+  raycon_price_p10,
+  raycon_price_p20,
+  raycon_price_median,
+  raycon_price_p80,
+  raycon_price_p90,
 
   /*
     Overlap definition:
@@ -104,29 +114,29 @@ SELECT
   END AS overlaps_absolute_raycon_band,
 
   CASE
-    WHEN rb.raycon_price_percentile_10 IS NULL
-      OR rb.raycon_price_percentile_90 IS NULL
+    WHEN rb.raycon_price_p20 IS NULL
+      OR rb.raycon_price_p80 IS NULL
       THEN NULL
-    WHEN bpp.price_percentile_90 <= rb.raycon_price_percentile_10 THEN 0
-    WHEN bpp.price_percentile_10 >= rb.raycon_price_percentile_90 THEN 0
+    WHEN bpp.price_p80 <= rb.raycon_price_p20 THEN 0
+    WHEN bpp.price_p20 >= rb.raycon_price_p80 THEN 0
     ELSE 1
-  END AS overlaps_percentile_raycon_band,
+  END AS overlaps_p20_p80_raycon_band,
 
   /*
     Coarse relationship label for filtering / storytelling in Tableau.
   */
   CASE
-    WHEN rb.raycon_price_percentile_10 IS NULL
-      OR rb.raycon_price_percentile_90 IS NULL
+    WHEN rb.raycon_price_p20 IS NULL
+      OR rb.raycon_price_p80 IS NULL
       THEN 'unknown'
-    WHEN bpp.price_percentile_90 <= rb.raycon_price_percentile_10 THEN 'below_raycon_p10'
-    WHEN bpp.price_percentile_10 >= rb.raycon_price_percentile_90 THEN 'above_raycon_p90'
-    ELSE 'overlaps_raycon_p10_p90'
-  END AS raycon_percentile_band_relationship
+    WHEN bpp.price_p80 <= rb.raycon_price_p20 THEN 'below_raycon_p20'
+    WHEN bpp.price_p20 >= rb.raycon_price_p80 THEN 'above_raycon_p80'
+    ELSE 'overlaps_raycon_p20_p80'
+  END AS raycon_p20_p80_band_relationship
 
 FROM brand_price_profile bpp
 CROSS JOIN raycon_band rb
 ORDER BY
-  overlaps_percentile_raycon_band DESC NULLS LAST,
+  overlaps_p20_p80_raycon_band DESC NULLS LAST,
   bpp.total_appearances DESC,
   bpp.brand;
