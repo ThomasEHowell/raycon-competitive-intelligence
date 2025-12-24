@@ -1,74 +1,75 @@
 # Raycon Competitive Intelligence: Google Shopping Visibility & Pricing Analytics
 
+Tableau Dashboard Suite:
+https://public.tableau.com/app/profile/thomas.howell2255/viz/RayconCompetitiveIntelligence-GoogleShoppingOrganicVisibility/RayconsOrganicVisibility
+<br> <br>
+
+![Raycon's Organic Visibility Dashboard](assets/figures/dashboard_raycon_organic_visibility.png)
+
 ## 1. Project Scope
-**Target Audience:**
-A DTC-first audio brand (Raycon) seeking to improve its digital visibility and competitiveness in Google Shopping search results.
 
 **Client Scenario:**
-This project simulates a consulting engagement with Raycon, a DTC-first audio brand. Raycon has not hired me and this project is not affiliated with Raycon; this is a fictional business case to demonstrate competitive intelligence workflows using real Google Shopping data.
+This project is framed as a consulting-style case study focused on Raycon, a direct-to-consumer audio brand. It is not affiliated with or endorsed by Raycon.
 
 **Business Problem:**
-Raycon competes in crowded, high-intent keyword categories such as wireless earbuds, noise-cancelling earbuds, and budget headphones. Because Raycon earns significantly higher margins from customers who buy through its own website rather than through Amazon or retail partners, improving Google Shopping visibility is strategically important.
-However, Raycon lacks clear visibility into:
+Raycon competes in crowded, high-intent keyword categories such as wireless earbuds, noise-cancelling earbuds, and budget headphones. Improving Google Shopping visibility is strategically important.
+Raycon lacks clear visibility into:
 - How often its products appear in Google Shopping search results
-- How its rankings compare against competitors
-- How pricing and seller dynamics influence placement
+- Its visibility relative to its competitors
 - Whether visibility is improving or declining over time
 
 **Objectives:**
-This project aims to build a data pipeline and competitive-intelligence analytics system that will:
-- Pull daily Google Shopping results for 7 high importance keywords
-- Store the raw API payloads in a PostgreSQL raw table
-- Transform and flatten the data into staging tables
-- Generate visibility and pricing metrics in an analytic mart
-- Produce a dashboard suite communicating insights and recommendations based on present trends
+- Pull daily Google Shopping results for high-intent audio keywords
+- Store, preserve, and transform raw API payloads
+- Generate organic visibility metrics
+- Communicate insights through a Tableau dashboard suite
 
 **Business Value:**
-By understanding visibility patterns, pricing pressures, and competitor dominance, Raycon can:
+By understanding visibility patterns and competitor dominance, Raycon can:
 - Improve high-margin DTC acquisition
-- Reduce dependence on Amazon marketplace fees
-- Identify keywords where sponsored or organic presence is weak
-- Benchmark their position against major competitor
+- Benchmark their position against major competitors
 - Make data-driven marketing and pricing decisions
-
-**Deliverables:** 
-- Automated Google Shopping API data pulls
-- PostgreSQL database with raw → staging → mart layers
-- Daily visibility and pricing metrics
-- Competitor visibility share
-- Trend analysis over time
-- Clear dashboard insights and potential recommendations based on observed patterns
 
 ## 2. Results Overview
 **Source:** SerpAPI (Google Shopping engine)  
 **Cadence:** Daily (7 keywords/day)  
-**Storage layers:**
-- Raw: full JSON payload per keyword search
-- Staging: relational tables at search-level and product-level grain
 
-**Semantic enrichment:**
-- Helper view (`vw_results_with_brand`) applies deterministic, rule-based brand classification
-  using prioritized substring matching on product titles.
-- This semantic layer is reused across marts and dimensions to avoid duplicated logic.
+### Results & Key Insights
 
-**Key complexity handled in staging:**
-Google Shopping responses include variable result modules (e.g., standard results, categorized modules, and occasional inline/sponsored blocks). The staging logic safely handles missing/optional modules without breaking.
+![Price-Band Competition Dashboard](assets/figures/dashboard_price_band_competition.png)
+
+#### Market Visibility Structure
+- Six brands account for over half of organic visibility in Google Shopping.
+- Raycon’s baseline visibility is meaningfully lower than the leading brands.
+
+#### Raycon Baseline Visibility
+- Across the full competitive landscape, Raycon represents approximately ~1% of total organic Google Shopping visibility.
+- Daily visibility exhibits noticeable volatility, while the 7-day moving average remains relatively stable over the observed period.
+
+#### Competitive Position Within Core Price Band
+- When restricting comparisons to competitors with overlapping mid-range pricing (P20–P80 overlap), several dominant brands drop out of the analysis.
+- Within this more comparable peer set, Raycon’s organic visibility increases to approximately 3–5% on most days.
+- Soundcore, Sony, and Beats account for roughly 60–70% of total visibility within this price band, indicating continued concentration but a more realistic benchmark for Raycon’s position.
 
 ## 3. Dataset Overview
-Raw JSON structure explored and documented in `02_parse_raw.ipynb`.
+The dataset consists of daily Google Shopping API responses, parsed from nested JSON into structured tables for analysis.
 
 ## 4. Major Project Steps
 1. Create raw and staging tables via SQL DDL
-1. Ingest raw Google Shopping API payloads (`01_ingest_raw.ipynb`)
+2. Ingest raw Google Shopping API payloads (`01_ingest_raw.ipynb`)
 3. Explore & parse raw JSON; design and prototype staging transformations (`02_parse_raw.ipynb`)
 4. Transform raw JSON into structured staging tables (`03_stage_unprocessed_raw.ipynb`)
 5. Create semantic helper views and analytic marts via SQL
 6. Create derived brand-level dimension views for pricing context
-7. (Next) Create Tableau dashboard suite
+7. Create Tableau dashboard suite
 
 ## 5. Project Structure
 ```
 raycon-competitive-intel/
+│
+├── README.md
+├── .env (not committed)
+├── requirements.txt
 │
 ├── data/
 │   └── samples/
@@ -87,52 +88,25 @@ raycon-competitive-intel/
 │       ├── build_mart_brand_day_visibility.sql    # Brand × day visibility mart
 │       └── build_dim_brand_price_profile.sql      # Brand-level price profile dimension
 │
-├── README.md
-├── .env (not committed)
-└── requirements.txt
+└── tableau/
+    ├── dashboards/
+    │   └── Raycon Competitive Intelligence - Organic Visibility.twbx
+    │
+    └── mockups/
+        ├── dashboard1_raycon_organic_visibility_mockup.png
+        ├── dashboard2_top_visible_competitors.png
+        └── dashboard3_core_price_competition_visibility.png
 ```
 ## 6. Reproducibility
-
-### Prerequisites
-- Python 3.9+
-- PostgreSQL
-- SerpAPI key
-- Libraries installation:
-`pip install -r requirements.txt`
-
-## Setup & Execution Steps
-
-1. Create database schemas and tables
-   - Run `src/db/schema_raw.sql` to create the raw schema
-   - Run `src/db/schema_staging.sql` to create staging tables
-
-2. Configure environment variables
-   - Add PostgreSQL credentials to `.env`
-   - Add your SerpAPI key (`SERPAPI_API_KEY`)
-
-3. Run raw data ingestion
-   - Execute `01_ingest_raw.ipynb`
-   - Pulls Google Shopping results via SerpAPI
-   - Inserts full JSON responses into the raw PostgreSQL table
-   - Updates the reference sample JSON used for development
-
-4. Parse and inspect raw JSON structure
-   - Execute `02_parse_raw.ipynb`
-   - Explore result modules and validate parsing logic
-
-5. Stage unprocessed raw searches
-   - Execute `03_stage_unprocessed_raw.ipynb`
-   - Identifies raw searches not yet staged
-   - Transforms JSON into structured staging tables
-   - Appends results within a single database transaction
-
-6. Create analytic views
-   - Execute mart and dimension SQL scripts in `src/db/`
-   - Export:
-     - `build_mart_brand_day_visibility` (time-series visibility metrics)
-     - `build_dim_brand_price_profile` (brand-level pricing context)
-   - Join on `brand` within Tableau Public
+The project is reproducible using Python, PostgreSQL, and a SerpAPI key. Dependencies are listed in requirements.txt, and final outputs are published via Tableau Public.
 
 ## 7. Conclusion
 
-This project demonstrates an end-to-end data pipeline for competitive intelligence using real Google Shopping data, with a focus on robust ingestion, raw data preservation, and repeatable staging transformations. The resulting dataset and derived mart and dimension provide a foundation for downstream visibility, pricing, and trend analysis.
+This project demonstrates an end-to-end competitive intelligence pipeline using real Google Shopping data, from raw ingestion through analytics-ready marts and dashboards. 
+
+The analysis highlights how organic visibility is distributed across competitors and how Raycon’s position changes when evaluated against comparable price-band peers. Together, the pipeline and dashboards provide a foundation for monitoring visibility trends, competitive concentration, and pricing context over time.
+
+## 8. Next Steps
+- Incorporate sponsored (inline) product results to analyze paid vs organic visibility.
+- Automate daily ingestion and transformations for continuous monitoring.
+- Transition the pipeline to the cloud to further support: longer history, automation, and ongoing competitive monitoring.
