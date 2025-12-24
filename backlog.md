@@ -3,7 +3,7 @@
 
 ## Current Focus (MVP)
 - [x] Build Brand × Day mart
-- [ ] Create Tableau dashboards
+- [x] Create Tableau dashboards
 - [ ] First publication
 
 ## Deferred Engineering Work
@@ -18,6 +18,7 @@
 - Raw error batch temporarily quarantined during MVP build
 - No data quality checks yet
 - Staging notebook assumes shopping_results exists for all keyword searches
+- Lack of inline_shopping_results being returned after December 12
 
 ## Future Improvements
 - Add more complex pricing semantic logic to dim_brand_price_profile.sql (quantiles and derived logic)
