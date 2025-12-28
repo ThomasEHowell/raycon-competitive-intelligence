@@ -9,11 +9,14 @@ CREATE SCHEMA IF NOT EXISTS raycon;
 -- One row per Google Shopping keyword search
 -- ============================================
 -- Raw table storing full SerpAPI JSON responses
-CREATE TABLE IF NOT EXISTS raycon.raw_google_shopping (
+CREATE TABLE IF NOT EXISTS raycon.raw_google_shopping_bro (
  id				BIGSERIAL PRIMARY KEY,
- pulled at		TIMESTAMPTZ NOT NULL,
+ pulled_at		TIMESTAMPTZ NOT NULL,
  keyword 		TEXT NOT NULL,
  page 			INT NOT NULL,
- response_json	JSONB NOT NULL
+ response_json	JSONB NOT NULL,
+ 
+ status         TEXT NOT NULL
+ 	CHECK (status IN ('success', 'failure'))
 );
 
