@@ -2,8 +2,8 @@
 > For deferred work, known issues, and future improvements
 
 ## Current Focus (Pipeline Reliability)
-- [ ] Idempotency
-- [ ] Robustness
+- [x] Idempotency
+- [x] Robustness
 - [ ] Logging (log each pull, log error payloads for debugging)
 - [ ] Refactoring
 - [ ] Scheduled Local Automation
