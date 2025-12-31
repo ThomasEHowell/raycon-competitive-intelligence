@@ -82,11 +82,20 @@ raycon-competitive-intel/
 │
 ├── src/
 │   └── db/
-│       ├── schema_raw.sql
-│       ├── create_staging_tables.sql
-│       ├── vw_results_with_brand.sql              # Brand classification semantic layer
-│       ├── build_mart_brand_day_visibility.sql    # Brand × day visibility mart
-│       └── build_dim_brand_price_profile.sql      # Brand-level price profile dimension
+│       ├── raw_staging/
+│       │   ├── schema_raw.sql                
+│       │   └── create_staging_tables.sql    
+│       │
+│       ├── views/
+│       │   ├── vw_results_with_brand.sql         # Brand classification semantic layer
+│       │   └── vw_raw_non_canonical_daily.sql    # Identifies superseded same-day raw pulls
+│       │
+│       ├── dimensions/
+│       │   └── build_dim_brand_price_profile.sql  # Brand-level price profile dimension
+│       │
+│       └── marts/
+│           └── build_mart_brand_day_visibility.sql # Brand × day visibility mart
+│
 │
 └── tableau/
     ├── dashboards/
@@ -107,6 +116,5 @@ This project demonstrates an end-to-end competitive intelligence pipeline using 
 The analysis highlights how organic visibility is distributed across competitors and how Raycon’s position changes when evaluated against comparable price-band peers. Together, the pipeline and dashboards provide a foundation for monitoring visibility trends, competitive concentration, and pricing context over time.
 
 ## 8. Next Steps
-- Incorporate sponsored (inline) product results to analyze paid vs organic visibility.
 - Automate daily ingestion and transformations for continuous monitoring.
 - Transition the pipeline to the cloud to further support: longer history, automation, and ongoing competitive monitoring.
