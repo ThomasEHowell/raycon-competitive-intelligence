@@ -5,3 +5,4 @@ __pycache__/
 *.twb
 *.twbr
 *.csv
+logs/*.log
