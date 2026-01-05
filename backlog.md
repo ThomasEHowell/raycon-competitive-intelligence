@@ -4,8 +4,8 @@
 ## Current Focus (Pipeline Reliability)
 - [x] Idempotency
 - [x] Robustness
-- [ ] Logging (log each pull, log error payloads for debugging)
-- [ ] Refactoring
+- [x] Logging (log each pull, log error payloads for debugging, log staging)
+- [ ] Refactoring (include logging robustness update ready for hard fails too)
 - [ ] Scheduled Local Automation
 
 ## Engineering Work
