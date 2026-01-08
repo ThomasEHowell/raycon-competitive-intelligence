@@ -15,12 +15,12 @@ from src.config import SERPAPI_KEY
 
 KEYWORDS = [
     'headphones',
-  #  'earbuds',
-   # 'best headphones',
-   # 'best earbuds',
-    #'wireless headphones',
-    #'wireless earbuds',
-    #'bluetooth headphones'
+    'earbuds',
+    'best headphones',
+    'best earbuds',
+    'wireless headphones',
+    'wireless earbuds',
+    'bluetooth headphones'
 ]
 
 def run_ingest_raw(engine):
