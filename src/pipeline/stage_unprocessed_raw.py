@@ -13,7 +13,7 @@ from src.db.engine import get_engine
 from src.transform.searches import build_searches_for_keyword
 from src.transform.results import build_results_for_keyword
 
-def main():
+def run_stage_unprocessed_raw(engine):
 
     # Connect to database
     engine = get_engine()
@@ -162,6 +162,11 @@ def main():
         f.write(end_line)
 
     print(end_line.strip())
+
+
+def main():
+    engine = get_engine()
+    run_stage_unprocessed_raw(engine)
 
 if __name__ == '__main__':
     main()
