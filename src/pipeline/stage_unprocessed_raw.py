@@ -14,11 +14,6 @@ from src.transform.searches import build_searches_for_keyword
 from src.transform.results import build_results_for_keyword
 
 def run_stage_unprocessed_raw(engine):
-
-    # Connect to database
-    engine = get_engine()
-
-
     # Logging Setup ----------------------------------------------
 
     PIPELINE_NAME = 'stage_unprocessed_raw'
