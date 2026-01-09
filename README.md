@@ -54,57 +54,39 @@ By understanding visibility patterns and competitor dominance, Raycon can:
 ## 3. Dataset Overview
 The dataset consists of daily Google Shopping API responses, parsed from nested JSON into structured tables for analysis.
 
-## 4. Major Project Steps
-1. Create raw and staging tables via SQL DDL
-2. Ingest raw Google Shopping API payloads (`01_ingest_raw.ipynb`)
-3. Explore & parse raw JSON; design and prototype staging transformations (`02_parse_raw.ipynb`)
-4. Transform raw JSON into structured staging tables (`03_stage_unprocessed_raw.ipynb`)
-5. Create semantic helper views and analytic marts via SQL
-6. Create derived brand-level dimension views for pricing context
-7. Create Tableau dashboard suite
+## 4. Pipeline Design & Reliability
+
+The pipeline is designed to support reliable, repeatable analytics over time rather than one-off analysis.
+
+Key design principles:
+- **Immutable raw ingestion** to preserve historical state and support reprocessing
+- **SQL-first canonical selection** to consistently identify the latest valid records per day
+- **Idempotent staging** to allow safe re-runs without data duplication
+- **Transactional execution with run-level logging** to prevent partial writes and record execution status, row counts, and runtime
+
+## 5. Pipeline Lifecycle
+1. Ingest raw Google Shopping API payloads into raw tables
+2. Select canonical daily records via SQL windowing logic
+3. Transform and stage structured search and result data
+4. Build analytic dimensions and marts
+5. Publish dashboards for monitoring and analysis
+
+The pipeline executes on a daily schedule and is designed to safely re-run and catch up if a scheduled execution is missed.
 
 ## 5. Project Structure
 ```
-raycon-competitive-intel/
+raycon-competitive-intelligence/
 │
-├── README.md
-├── .env (not committed)
-├── requirements.txt
+├── notebooks/        # Exploration, prototyping, and schema design
+├── src/              # Production pipeline logic
+│   ├── pipeline/     # Ingestion, staging, and orchestration
+│   ├── transform/    # Parsing and normalization logic
+│   └── db/           # DB logic, schema creation, views, dimensions, and marts
 │
-├── data/
-│   └── samples/
-│       └── google_shopping_example.json      # Sample raw API payload
-│
-├── notebooks/
-│   ├── 01_ingest_raw.ipynb               # API pull + raw ingestion
-│   ├── 02_parse_raw.ipynb                # JSON exploration + staging design + prototype transforms
-│   └── 03_stage_unprocessed_raw.ipynb    # Stage unprocessed raw searches into schema-aligned staging tables
-│
-├── src/
-│   └── db/
-│       ├── raw_staging/
-│       │   ├── schema_raw.sql                
-│       │   └── create_staging_tables.sql    
-│       │
-│       ├── views/
-│       │   ├── vw_results_with_brand.sql         # Brand classification semantic layer
-│       │   └── vw_raw_non_canonical_daily.sql    # Identifies superseded same-day raw pulls
-│       │
-│       ├── dimensions/
-│       │   └── build_dim_brand_price_profile.sql  # Brand-level price profile dimension
-│       │
-│       └── marts/
-│           └── build_mart_brand_day_visibility.sql # Brand × day visibility mart
-│
-│
-└── tableau/
-    ├── dashboards/
-    │   └── Raycon Competitive Intelligence - Organic Visibility.twbx
-    │
-    └── mockups/
-        ├── dashboard1_raycon_organic_visibility_mockup.png
-        ├── dashboard2_top_visible_competitors.png
-        └── dashboard3_core_price_competition_visibility.png
+├── data/             # Sample data and derived outputs
+├── assets/           # Figures used in documentation
+├── logs/             # Runtime logs (gitignored)
+└── tableau/          # Dashboards and mockups
 ```
 ## 6. Reproducibility
 The project is reproducible using Python, PostgreSQL, and a SerpAPI key. Dependencies are listed in requirements.txt, and final outputs are published via Tableau Public.
@@ -116,5 +98,6 @@ This project demonstrates an end-to-end competitive intelligence pipeline using 
 The analysis highlights how organic visibility is distributed across competitors and how Raycon’s position changes when evaluated against comparable price-band peers. Together, the pipeline and dashboards provide a foundation for monitoring visibility trends, competitive concentration, and pricing context over time.
 
 ## 8. Next Steps
-- Automate daily ingestion and transformations for continuous monitoring.
-- Transition the pipeline to the cloud to further support: longer history, automation, and ongoing competitive monitoring.
+- Expand analytical marts to support pricing and seller-level analysis
+- Add data quality checks for anomalous visibility shifts
+- Migrate execution to cloud-based orchestration as scale increases
