@@ -5,6 +5,7 @@ pd.set_option("future.no_silent_downcasting", True)
 
 from sqlalchemy import text
 
+import traceback
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
