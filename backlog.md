@@ -2,7 +2,7 @@
 > For deferred work, known issues, and future improvements
 
 # Current Focus (Greater Pipeline Reliability)
-- [ ] Add try-except in case of errors (hard fails) for logging
+- [x] Add try-except in case of errors (hard fails) for logging
 - [ ] Add logging for run_daily.py
 - [ ] Consider moving logging into a database table
 - [ ] Create a loud failure mechanism in the case of pipeline failure
