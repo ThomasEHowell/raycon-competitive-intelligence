@@ -3,9 +3,10 @@
 
 # Current Focus (Greater Pipeline Reliability)
 - [x] Add try-except in case of errors (hard fails) for logging
-- [ ] Add logging for run_daily.py
+- [x] Add logging for run_daily.py
+- [x] Create a loud failure mechanism (email alert) in the case of pipeline failure
+- [ ] Create user-optionality to enable or disable email alerts on failure
 - [ ] Consider moving logging into a database table
-- [ ] Create a loud failure mechanism in the case of pipeline failure
 
 
 ## Known Issues
