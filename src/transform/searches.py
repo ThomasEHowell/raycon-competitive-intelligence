@@ -35,7 +35,7 @@ def build_searches_for_keyword(keyword_raw):
     "gl": params.get("gl"),
     "hl": params.get("hl"),
     "device": params.get("device"),
-    "num_results_requested": int(params.get("num")),
+    "num_results_requested": int(params["num"]) if params.get("num") is not None else None,
     "engine": params.get("engine"),
     "google_domain": params.get("google_domain"),
     }])
